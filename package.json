@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "busboy": "^1.0.0",
+    "mime": "^3.0.0",
+    "mkdirp": "^1.0.4"
+  }
+}
