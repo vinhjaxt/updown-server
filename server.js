@@ -59,9 +59,17 @@ const DIR = process.argv[2] || './uploads'
 
 if (!fs.existsSync(DIR)) mkdirp(DIR).catch(e => console.error(e))
 const LIST_FILES = true
+const AUTH_HEADER = process.argv[3] && `Basic `+btoa(process.argv[3])
 
 http.createServer((req, res) => {
   try {
+    if (AUTH_HEADER && req.headers.authorization !== AUTH_HEADER) {
+      res.writeHead(401, {
+        'WWW-Authenticate': `Basic realm="Get out!"`
+      })
+      res.end()
+      return
+    }
     if (req.method.toUpperCase() === 'GET') {
       if (req.url.substr(0, 5) === '/down') {
         if (~req.url.indexOf('/', 1)) {
