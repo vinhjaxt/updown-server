@@ -1,0 +1,17 @@
+# git clone --depth 1 --single-branch https://github.com/vinhjaxt/updown-server upload-src
+services:
+  upload:
+    build:
+      context: ./upload-src/
+      network: host
+    working_dir: /opt/
+    command: node /opt/src/server.js /opt/uploads 'admin:SecurePassword'
+    volumes:
+      - ./data:/opt/uploads:rw
+      - ./upload-src:/opt/src:ro
+    read_only: true
+    ports:
+      - 8001:8001
+    restart: unless-stopped
+    networks:
+      - default
