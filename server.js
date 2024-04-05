@@ -25,9 +25,10 @@ const compressPiper = {
   br: zlib.createBrotliCompress && zlib.createBrotliCompress.bind(zlib)
 }
 function saveFile(fieldname, file, info) {
-  if (!info || !info.filename) return file.resume()
+  const outfile = DIR + '/' + path.basename(info.filename) + '-' + Date.now() + path.extname(info.filename)
+  if (!info || !info.filename || !path.resolve(outfile).startsWith(path.resolve(DIR)+'/')) return file.resume()
   console.log('Uploading', fieldname, info)
-  file.pipe(fs.createWriteStream(DIR + '/' + path.basename(info.filename) + '-' + Date.now() + path.extname(info.filename)))
+  file.pipe(fs.createWriteStream(outfile))
 }
 function finishReq() {
   // Upload done
@@ -65,8 +66,13 @@ http.createServer((req, res) => {
       if (req.url.substr(0, 5) === '/down') {
         if (~req.url.indexOf('/', 1)) {
           // download file
-          const filename = decodeURIComponent(path.basename(req.url))
+          const filename = path.basename(decodeURIComponent(path.basename(req.url)))
           const file = DIR + '/' + filename
+          if (!path.resolve(file).startsWith(path.resolve(DIR)+'/')) {
+            res.writeHead(404)
+            res.end()
+            return
+          }
           let fileStat
           try {
             fileStat = fs.statSync(file)
